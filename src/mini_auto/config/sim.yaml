@@ -1,0 +1,34 @@
+# sim_robot 用 (robot.yaml と一緒に読む)
+sim_robot:
+  ros__parameters:
+    drive_speed_gain: 0.9         # 実際の速度 / 指令速度 (オープンループ誤差)
+    tracking_slip_stddev: 0.02    # 計測輪のすべり(比率)
+    start_x: 0.0
+    start_y: 0.0
+    start_yaw_deg: 0.0
+    scan_frame: "laser_frame"
+    scan_beams: 720
+    scan_range_max: 12.0
+    scan_noise_stddev: 0.01
+    imu_period_ms: 10
+    imu_yaw_drift_deg_per_min: 0.5
+    imu_yaw_noise_deg: 0.05
+    depth_frame: "camera_depth_optical_frame"
+    depth_width: 160
+    depth_height: 100
+    depth_hfov_deg: 87.0
+    depth_min: 0.4
+    wall_height: 2.0
+    # LiDAR より低い箱 [xmin, ymin, xmax, ymax, height, ...]: 深度カメラにしか映らない
+    low_obstacles: [0.9, 0.9, 1.5, 1.5, 0.15]
+    # 壁 [x1, y1, x2, y2, ...]: 8 m x 6 m の部屋 + 仕切り(上側が通路) + 箱
+    walls: [-1.5, -2.0,  6.5, -2.0,
+             6.5, -2.0,  6.5,  4.0,
+             6.5,  4.0, -1.5,  4.0,
+            -1.5,  4.0, -1.5, -2.0,
+             2.5, -2.0,  2.5,  1.8,
+             4.5, -0.5,  5.0, -0.5,
+             5.0, -0.5,  5.0,  0.0,
+             5.0,  0.0,  4.5,  0.0,
+             4.5,  0.0,  4.5, -0.5,
+            -0.5,  2.5,  0.5,  2.5]

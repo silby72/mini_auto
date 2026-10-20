@@ -1,0 +1,78 @@
+Panels:
+  - Class: rviz_common/Displays
+    Name: Displays
+Visualization Manager:
+  Class: ""
+  Global Options:
+    Background Color: 48; 48; 48
+    Fixed Frame: map
+    Frame Rate: 30
+  Displays:
+    - Class: rviz_default_plugins/Grid
+      Enabled: true
+      Name: Grid
+      Reference Frame: <Fixed Frame>
+    - Class: rviz_default_plugins/Map
+      Enabled: true
+      Name: Map
+      Topic:
+        Value: /map
+        Durability Policy: Transient Local
+      Color Scheme: map
+    - Class: rviz_default_plugins/LaserScan
+      Enabled: true
+      Name: Scan
+      Topic:
+        Value: /scan
+        Reliability Policy: Best Effort
+      Size (m): 0.03
+      Color Transformer: FlatColor
+      Color: 255; 80; 80
+    - Class: rviz_default_plugins/LaserScan
+      Enabled: true
+      Name: Depth obstacles (D456)
+      Topic:
+        Value: /depth_scan
+        Reliability Policy: Best Effort
+      Size (m): 0.04
+      Color Transformer: FlatColor
+      Color: 255; 200; 0
+    - Class: rviz_default_plugins/Path
+      Enabled: true
+      Name: SLAM path
+      Topic:
+        Value: /slam/path
+      Color: 25; 255; 0
+    - Class: rviz_default_plugins/Path
+      Enabled: true
+      Name: Nav plan
+      Topic:
+        Value: /nav/plan
+      Color: 0; 170; 255
+      Line Width: 0.05
+      Line Style: Billboards
+    - Class: rviz_default_plugins/Pose
+      Enabled: true
+      Name: Ground truth (sim)
+      Topic:
+        Value: /sim/ground_truth
+      Shape: Axes
+    - Class: rviz_default_plugins/TF
+      Enabled: true
+      Name: TF
+      Show Names: true
+      Marker Scale: 0.5
+  Tools:
+    - Class: rviz_default_plugins/MoveCamera
+    - Class: rviz_default_plugins/Interact
+    - Class: rviz_default_plugins/SetGoal
+      Topic:
+        Value: /goal_pose
+    - Class: rviz_default_plugins/Measure
+  Views:
+    Current:
+      Class: rviz_default_plugins/TopDownOrtho
+      Name: Current View
+      Scale: 60
+      X: 2
+      Y: 1

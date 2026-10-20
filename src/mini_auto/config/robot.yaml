@@ -1,0 +1,98 @@
+# mini_auto 機体パラメータ
+#
+# 【仮置き】と書いた値は実機に合わせて必ず測り直すこと。
+# 車輪は「ロボット中心(base_link)からの位置 x, y [m]」と
+# 「正転(duty>0, sign=1)したときに接地点が進む向き dir_deg [deg]」で表す。
+# 座標系: x 前, y 左, 反時計回りが正 (REP-103)。
+
+# 複数ノード(omni_drive / tracking_odom / sim_robot)で共有する値
+/**:
+  ros__parameters:
+    # ----- 足回り: 4輪オムニ -----
+    # 【仮置き】X配置, 中心から 0.2 m (45°, 135°, 225°, 315°), 転がり方向は接線(反時計回り)
+    drive_wheel_x:       [ 0.1414, -0.1414, -0.1414,  0.1414]
+    drive_wheel_y:       [ 0.1414,  0.1414, -0.1414, -0.1414]
+    drive_wheel_dir_deg: [ 135.0,   225.0,   315.0,    45.0]
+    # 【仮置き】送信先 serial_tx_[ID] とスロット, モータの回転方向
+    drive_device_ids: [1, 1, 1, 1]
+    drive_tx_slots:   [0, 1, 2, 3]
+    drive_signs:      [1, 1, 1, 1]
+    max_wheel_speed: 1.5   # duty_max のときの転がり速度 [m/s] 【仮置き】
+    duty_max: 255.0
+
+    # ----- オドメトリ: 3輪計測輪(三角形) -----
+    # 【仮置き】中心から 0.12 m (90°, 210°, 330°), 転がり方向は接線(反時計回り)
+    tracking_wheel_x:       [ 0.0,   -0.1039,  0.1039]
+    tracking_wheel_y:       [ 0.12,  -0.06,   -0.06]
+    tracking_wheel_dir_deg: [ 180.0,  300.0,    60.0]
+    # 【仮置き】受信元 serial_rx_[ID]_zeroed とスロット, エンコーダの向き
+    tracking_device_ids: [1, 1, 1]
+    tracking_rx_slots:   [0, 1, 2]
+    tracking_signs:      [1, 1, 1]
+    tracking_wheel_radius: 0.024     # [m] 【仮置き】
+    tracking_counts_per_rev: 2048.0  # 計測輪1回転あたりのカウント(逓倍後) 【仮置き】
+
+omni_drive:
+  ros__parameters:
+    max_acc: 1.0        # [m/s^2]
+    max_ang_acc: 3.0    # [rad/s^2]
+    cmd_timeout: 0.5    # [s]
+    period_ms: 20
+
+tracking_odom:
+  ros__parameters:
+    odom_frame: "odom"
+    base_frame: "base_link"
+    publish_tf: true
+    max_wheel_step: 0.1  # [m] 1周期でこれ以上はカウント飛びとして捨てる
+    period_ms: 10
+    # 回転量を IMU (WT901C) の yaw から取る。並進は計測輪
+    use_imu: true
+    imu_topic: "imu"
+    imu_yaw_sign: 1      # 逆さ付けなら -1
+    imu_timeout: 0.5     # [s] これより途切れたら計測輪の yaw に戻す
+
+depth_obstacle:
+  ros__parameters:
+    depth_topic: "camera/camera/depth/image_rect_raw"
+    info_topic: "camera/camera/depth/camera_info"
+    output_topic: "depth_scan"
+    base_frame: "base_link"
+    depth_scale: 0.001   # RealSense の 16UC1 は mm
+    min_height: 0.05     # 床からこれより上を障害物に [m] (カメラの取り付け角がずれると床を拾う)
+    max_height: 0.6      # 機体の高さ [m] 【仮置き】
+    min_range: 0.3       # [m]
+    max_range: 3.0       # [m]
+    stride: 4
+    min_points_per_bin: 3
+
+simple_nav:
+  ros__parameters:
+    map_frame: "map"
+    base_frame: "base_link"
+    # 計画
+    robot_radius: 0.25        # 機体の外接円半径 [m] 【仮置き】
+    footprint_padding: 0.08   # 計画上の通行不可を robot_radius + これ に広げる [m]
+    inflation_radius: 0.5     # これより壁に近い経路にコストをかける [m]
+    cost_weight: 3.0
+    use_scan_obstacles: true  # 地図にない障害物もスキャンで避ける
+    obstacle_topics: ["scan", "depth_scan"]  # TG30 と D456 (depth_obstacle)
+    obstacle_memory: 10.0     # 視野から外れた障害物を覚えておく時間 [s]
+    obstacle_timeout: 0.5     # 安全判定に使うスキャンの鮮度 [s]
+    self_filter_radius: 0.0   # 自機の支柱等が TG30 に映るなら機体半径程度に [m]
+    plan_period: 1.0          # 再計画周期 [s]
+    # 追従
+    max_vel: 0.4              # [m/s]
+    min_vel: 0.05             # [m/s]
+    max_decel: 0.5            # [m/s^2]
+    max_wz: 1.0               # [rad/s]
+    yaw_kp: 1.5
+    face_travel_direction: true  # 移動中は進行方向を向く (D456 で進む先を見る)
+    face_goal_distance: 0.5      # ゴールまでこれ以内でゴールの向きに合わせる [m]
+    min_heading_scale: 0.2       # 向きのずれが大きいときの並進速度の下限倍率
+    lookahead: 0.4            # [m]
+    xy_tolerance: 0.05        # [m]
+    yaw_tolerance: 0.05       # [rad]
+    # 安全(機体の縁からの距離)
+    stop_gap: 0.10            # [m]
+    slow_gap: 0.40            # [m]
